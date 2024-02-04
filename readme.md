@@ -5,5 +5,5 @@ api: node server.js
 
 
 User login details
-useername: thando
+username: thando
 passsword 12345
