@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react';
-import { fetchCases, fetchComments } from '../api/cases';
+import { fetchCases, fetchComments, addLike } from '../api/cases';
 import styles from './case.module.css'
 import CreateComment from '../components/comment'
 
@@ -13,6 +13,14 @@ const CommentsContent: React.FC = () => {
   const id = {
     case_id: localStorage.getItem('case_id')
   }
+
+  const likeComment = async (id) => {
+    
+    addLike(id)
+    
+    location.reload()
+  };
+ 
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,6 +35,8 @@ const CommentsContent: React.FC = () => {
 
     fetchData();
   }, []);
+
+  
 
   return (
     <div className={styles.container}>
@@ -45,7 +55,8 @@ const CommentsContent: React.FC = () => {
           {comments.map((item) => (
             <div key={item.comment_id} className={styles.comment}>
               <p className={styles.commentDesc}>{item.description}</p>
-              <p className={styles.likes}>{item.likes} likes</p>
+              <p className={styles.likes}>{item.likes} likes <button onClick={() => likeComment(item.comment_id)}>+Like</button></p>
+              
 
             </div>
           ))}

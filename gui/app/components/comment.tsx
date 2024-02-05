@@ -34,6 +34,7 @@ const CreateComment: React.FC = () => {
                 <input
                     required
                     value={description}
+                    placeholder='Type comment here...'
                     onChange={(e) => setDesc(e.target.value)}
                 />
                 <button onClick={handleCreate}>Submit</button>

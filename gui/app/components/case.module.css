@@ -34,10 +34,12 @@
 }
 .likes {
     width: 100%;
-    padding-left: 87%;
+    padding-left: 78%;
     font-size: 0.7rem;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    gap: 0.5rem;
 }
 .container {
     position: relative;

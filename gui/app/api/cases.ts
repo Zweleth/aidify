@@ -112,3 +112,25 @@ export const addComment = async ( newComment: {case_id: string, user_id: string,
         throw new Error('Failed to add comment');
     }
 };
+
+export const addLike = async ( comment_id: string) => {
+    const response = await fetch(`${BASE_URL}like`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `${localStorage.getItem('token')}`, // Include JWT token if authenticated
+        },
+        body: JSON.stringify({
+            "comment_id":comment_id,
+            "user_id":
+            localStorage.getItem('user_id')
+        }),
+    });
+
+    if (response.ok) {
+        const data = await response.json();
+        return data;
+    } else {
+        throw new Error('Failed to like comment');
+    }
+};
