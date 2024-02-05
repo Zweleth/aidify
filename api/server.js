@@ -31,7 +31,7 @@ app.post('/register', async (req, res) => {
             return res.status(500).json({ error: 'Username already taken' });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
-    
+
         // Hash the password
         // Insert user into the database
         db.run('INSERT INTO users (username, password) VALUES (?,?)', [username, hashedPassword], (err) => {
@@ -43,14 +43,15 @@ app.post('/register', async (req, res) => {
     })
 
 
-    
+
+
 
 });
 
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
-    let user_id 
-    
+    let user_id
+
     db.get('SELECT * FROM users WHERE username = ?', [username], async (err, user) => {
         if (err) {
             return res.status(500).json({ error: 'Failed to authenticate user' });
@@ -72,11 +73,11 @@ app.post('/login', async (req, res) => {
 
         // Generate a JWT token
         const token = jwt.sign({ userId: user.id, username: user.username }, SECRET_KEY, { expiresIn: '3h' });
-        
-        
+
+
         if (passwordMatch) {
             res.status(201).json({
-                token,user_id
+                token, user_id
             });
         }
     });
@@ -140,7 +141,7 @@ app.get('/comments/:id', authenticateToken, (req, res) => {
             return res.status(401).json({ error: 'No comments' });
         }
         if (data1) {
-            db.all('SELECT * FROM comments WHERE case_id = ?', [req.params.id], (err, data2) => {
+            db.all('SELECT t1.*, COUNT(t2.comment_id) AS likes FROM comments t1 LEFT JOIN likes t2 ON t1.comment_id = t2.comment_id WHERE t1.case_id = ? GROUP BY t1.comment_id', [req.params.id], (err, data2) => {
 
                 if (err) {
                     return res.status(500).json({ error: 'Failed to authenticate user' });
@@ -168,8 +169,6 @@ app.get('/comments/:id', authenticateToken, (req, res) => {
 
 });
 
-//create a support case
-
 app.post('/case', authenticateToken, (req, res) => {
 
     const { title, description, user_id } = req.body;
@@ -181,8 +180,6 @@ app.post('/case', authenticateToken, (req, res) => {
     });
 
 });
-
-//Create a comment
 
 app.post('/comment', authenticateToken, (req, res) => {
 
@@ -196,14 +193,22 @@ app.post('/comment', authenticateToken, (req, res) => {
 
 });
 
-app.put('/like', authenticateToken, (req, res) => {
-    const { comment_id } = req.body;
-    db.run('UPDATE comments SET likes = likes + 1 WHERE comment_id = ?', [comment_id], (err) => {
-        if (err) {
+app.post('/like', authenticateToken, (req, res) => {
+    const { comment_id, user_id } = req.body;
+    db.get('SELECT * FROM likes WHERE user_id = ? AND comment_id = ?', [user_id, comment_id], async (err, like) => {
+        if (like) {
             return res.status(500).json({ error: 'Problem liking the comment' });
         }
-        res.status(201).json({ message: 'Liked' });
-    });
+        if (!like) {
+            db.run('INSERT INTO likes (comment_id, user_id) VALUES (?,?)', [comment_id, user_id], (err) => {
+                if (err) {
+                    return res.status(500).json({ error: 'Problem liking the comment' });
+                }
+                res.status(201).json({ message: 'Liked' });
+            });
+        }
+
+    })
 
 });
 
